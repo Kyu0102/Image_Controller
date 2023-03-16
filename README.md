@@ -19,3 +19,7 @@ This code control image's contrast, brightness, degree and size.
 
 You can make image original to press space bar.
 and, press "ESC" to quit the window
+
+Also, Indicator for each properties is ready!
+
+![image](https://user-images.githubusercontent.com/128031528/225577354-f842a630-09fd-4eb7-a673-0a8d8690a756.png)
