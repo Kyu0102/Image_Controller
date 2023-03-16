@@ -1,0 +1,90 @@
+import numpy as np
+import cv2 as cv
+
+def rotate(img, degree):
+    img_rotate = np.zeros(img.shape, dtype = np.uint8)
+    c, s = np.cos(np.deg2rad(degree)), np.sin(np.deg2rad(degree))
+    R = np.array([[c, -s], [s, c]]).T
+    h, w, *_ = img.shape
+    cx = (w - 1) / 2
+    cy = (h - 1) / 2
+    
+    for ry in range(h):
+        for rx in range(w):
+            dx, dy = R @ [rx - cx, ry - cy]
+            x, y = int(dx + cx + 0.5), int(dy + cy + 0.5)
+            if x >= 0 and y >= 0 and x < w and y < h:
+                img_rotate[ry, rx, :] = img[y, x, :]
+    return img_rotate
+
+def resize(img, scale):
+    img_shape = list(img.shape)
+    img_shape[0] = int(img_shape[0] * scale)
+    img_shape[1] = int(img_shape[1] * scale)
+    img_resize = np.zeros(img_shape, dtype = np.uint8)
+    
+    for ry in range(img_shape[0]):
+        y = ry / scale
+        for rx in range(img_shape[1]):
+            x = rx / scale
+            img_resize[ry, rx, :] = img[int(y+0.5), int(x+0.5), :]
+    return img_resize
+
+if __name__ == '__main__': # To check whether this file is start or not
+
+    img = cv.imread('C:/users/90531/lena512.tiff')
+
+    if img is not None:
+        degree = 0
+        degree_step = 10
+        scale = 1
+        contrast = 1.6
+        contrast_step = 0.1
+        brightness = -40
+        brightness_step = 10
+        
+        while True:
+            info_resize = f'x{scale:.1f}'
+            info_rotate = f'{degree}[deg]'
+            info_bright = f'Brightness:{brightness + 40}'
+            info_contrast = f'Contrast:{(contrast - 1.6):.1f}'
+            
+            img_resize = resize(img, scale)
+            img_rotate = rotate(img_resize, degree)
+            img_tran = contrast * img_rotate + brightness
+            img_tran[img_tran < 0] = 0
+            img_tran[img_tran > 255] = 255
+            img_tran = img_tran.astype(np.uint8)
+            
+            cv.putText(img_tran, info_resize, (10,20), cv.FONT_HERSHEY_DUPLEX, 0.5, (255, 0, 0), thickness = 1)
+            cv.putText(img_tran, info_rotate, (10,40), cv.FONT_HERSHEY_DUPLEX, 0.5, (0, 255, 0), thickness = 1)
+            cv.putText(img_tran, info_bright, (80,20), cv.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 0), thickness = 1)
+            cv.putText(img_tran, info_contrast, (80,42), cv.FONT_HERSHEY_DUPLEX, 0.5, (255, 255, 255), thickness = 1)
+            
+            cv.imshow('Image Controller', img_tran)
+            key = cv.waitKey()
+
+            if key == 27:
+                break
+            elif key == ord(' '):
+                degree = 0
+                scale = 1
+                contrast = 1.6
+                brightness = -40
+            elif key == ord('+') or key == ord('='):
+                contrast += contrast_step
+            elif key == ord('-') or key == ord('_'):
+                contrast -= contrast_step
+            elif key == ord(']') or key == ord('}'):
+                brightness += brightness_step
+            elif key == ord('[') or key == ord('{'):
+                brightness -= brightness_step
+            elif key == ord('Q') or key == ord('q'):
+                scale = min(scale + 0.1, 3)
+            elif key == ord('E') or key == ord('e'):
+                scale = max(scale - 0.1, 0.3)
+            elif key == ord('A') or key == ord('a'):
+                degree -= degree_step
+            elif key == ord('D') or key == ord('d'):
+                degree += degree_step
+        cv.destroyAllWindows()
