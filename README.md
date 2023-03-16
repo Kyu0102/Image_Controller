@@ -1,4 +1,4 @@
-# Simple_ComputerVision_and_DeepLearning
+# Image_Controller
 This code control image's contrast, brightness, degree and size.
 
 [Resize]
